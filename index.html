@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatCatchup - Cyberpunk Edition</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .neon-box {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.9));
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
+        }
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+    </style>
+</head>
+<body id="bodyTheme" class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6 selection:bg-cyan-500 selection:text-slate-950 transition-colors duration-300">
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="w-full max-w-6xl flex justify-between items-center py-4 px-6 rounded-2xl bg-slate-900/40 border border-purple-900/30 backdrop-blur-md">
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="goHome()">
+            <div id="navDot" class="w-3 h-3 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#22d3ee]"></div>
+            <span class="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 neon-glow">ChatCatchup</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <select onchange="changeTheme(this.value)" class="bg-slate-950 border border-purple-900/50 text-xs font-mono text-purple-300 rounded-lg px-2 py-1 focus:outline-none">
+                <option value="purple">🌌 Synthwave</option>
+                <option value="cyan">⚡ Cyber Cyan</option>
+                <option value="pink">💖 Laser Pink</option>
+            </select>
+            <span id="navUserBadge" class="text-xs font-mono px-3 py-1 rounded-full bg-purple-950/80 border border-purple-700/50 text-purple-300 hidden">Guest</span>
+            <button onclick="openAuthModal()" id="navActionBtn" class="bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition shadow-[0_0_15px_rgba(6,182,212,0.3)]">Get Started</button>
+        </div>
+    </nav>
+
+    <!-- LANDING HERO SECTION -->
+    <main id="landingHero" class="w-full max-w-4xl flex flex-col items-center text-center my-auto py-12 px-4 space-y-8">
+        <div class="space-y-4 max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-100 leading-tight">
+                Read less. <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 neon-glow">Catch up instantly.</span>
+            </h1>
+            <p class="text-slate-300/80 text-base md:text-lg font-light max-w-2xl mx-auto">
+                ChatCatchup analyzes chat logs to instantly surface direct mentions, conflicts, and crisp action points.
+            </p>
+        </div>
+
+        <div>
+            <button onclick="openAuthModal()" class="bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 hover:opacity-90 text-slate-950 font-extrabold px-8 py-4 rounded-2xl text-sm uppercase tracking-wider transition shadow-[0_0_30px_rgba(6,182,212,0.4)] transform hover:scale-105">
+                ⚡ Start Summarizing Free
+            </button>
+        </div>
+    </main>
+
+    <!-- MODAL / APP CONTAINER -->
+    <div id="appContainer" class="hidden w-full max-w-xl my-auto py-6">
+        <div class="neon-box rounded-2xl p-6 transition-all duration-300">
+
+            <!-- AUTH VIEW -->
+            <div id="authView" class="space-y-5 py-2">
+                <div class="space-y-1 text-center">
+                    <h2 id="authTitle" class="text-xl font-bold text-cyan-300">Create Your Account ⚡</h2>
+                    <p id="authSubtitle" class="text-purple-200/80 text-xs">Enter your details to secure your workspace.</p>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <div id="nameFieldContainer">
+                        <label for="fullNameInput" class="block text-xs font-mono uppercase tracking-wider text-cyan-400 mb-1">Full Name</label>
+                        <input type="text" id="fullNameInput" class="w-full bg-slate-950/80 border border-purple-900/50 rounded-xl p-2.5 text-cyan-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-slate-600" placeholder="e.g. Alisha">
+                    </div>
+
+                    <div>
+                        <label for="emailInput" class="block text-xs font-mono uppercase tracking-wider text-cyan-400 mb-1">Email Address</label>
+                        <input type="email" id="emailInput" class="w-full bg-slate-950/80 border border-purple-900/50 rounded-xl p-2.5 text-cyan-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-slate-600" placeholder="e.g. name@example.com">
+                    </div>
+
+                    <div>
+                        <label for="passwordInput" class="block text-xs font-mono uppercase tracking-wider text-cyan-400 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="passwordInput" class="w-full bg-slate-950/80 border border-purple-900/50 rounded-xl p-2.5 pr-10 text-cyan-100 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-slate-600" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-purple-400 hover:text-cyan-300 text-sm focus:outline-none" id="togglePasswordBtn" title="Show Password">👁️</button>
+                        </div>
+                    </div>
+
+                    <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 hover:opacity-90 text-slate-950 font-bold py-3 rounded-xl transition duration-200 shadow-[0_0_20px_rgba(6,182,212,0.4)] tracking-wide uppercase text-sm mt-2">
+                        🚀 Create Account
+                    </button>
+
+                    <div class="text-center pt-2">
+                        <button onclick="toggleAuthMode()" id="authSwitchToggle" class="text-xs text-purple-300 hover:text-cyan-300 underline font-mono">Already have an account? Sign in</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WELCOME & PLATFORM SELECTION -->
+            <div id="welcomeView" class="hidden space-y-6 text-center py-4">
+                <div class="space-y-2">
+                    <h2 id="personalizedGreeting" class="text-xl font-bold text-cyan-300">Welcome! ⚡</h2>
+                    <p class="text-purple-200/80 text-sm">Select your platform to catch up:</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 pt-2">
+                    <button onclick="selectPlatform('WhatsApp')" class="flex items-center justify-center space-x-3 w-full bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 font-semibold py-3.5 rounded-xl transition duration-200">
+                        <span class="text-lg">💬</span>
+                        <span>WhatsApp Chat Analyzer</span>
+                    </button>
+                    <button onclick="selectPlatform('Telegram')" class="flex items-center justify-center space-x-3 w-full bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/40 text-sky-300 font-semibold py-3.5 rounded-xl transition duration-200">
+                        <span class="text-lg">✈️</span>
+                        <span>Telegram Stream Analyzer</span>
+                    </button>
+                </div>
+                <div class="pt-3 flex justify-between items-center text-xs font-mono">
+                    <button onclick="openHistoryModal()" class="text-cyan-400 hover:underline">📂 Past Reports (<span id="historyCount">0</span>)</button>
+                    <button onclick="logout()" class="text-purple-400 hover:text-cyan-300 underline">← Sign Out</button>
+                </div>
+            </div>
+
+            <!-- WORKSPACE -->
+            <div id="workspaceView" class="hidden space-y-4">
+                <div class="flex justify-between items-center border-b border-purple-900/40 pb-3">
+                    <span id="activePlatformBadge" class="text-xs font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/50 px-2.5 py-1 rounded-md border border-cyan-800/50">WhatsApp Mode</span>
+                    <button onclick="backToWelcome()" class="text-xs text-purple-400 hover:text-cyan-300 underline font-mono">← Switch Platform</button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono uppercase tracking-wider text-pink-400 mb-1.5">Summary Style</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setFormat('crisp')" id="formatBtn-crisp" class="bg-purple-900 text-purple-100 text-xs font-mono py-1.5 rounded-lg border border-purple-500 transition">⚡ Crisp</button>
+                        <button type="button" onclick="setFormat('brief')" id="formatBtn-brief" class="bg-slate-900/80 text-purple-400 text-xs font-mono py-1.5 rounded-lg border border-purple-900 transition">📝 Brief</button>
+                        <button type="button" onclick="setFormat('full')" id="formatBtn-full" class="bg-slate-900/80 text-purple-400 text-xs font-mono py-1.5 rounded-lg border border-purple-900 transition">📊 Full Log</button>
+                    </div>
+                </div>
+
+                <!-- Paste Chat Stream Input Box with Clear Button & Counter -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center">
+                        <label for="chatInput" class="block text-xs font-mono uppercase tracking-wider text-cyan-400">Paste Chat Stream</label>
+                        <div class="space-x-2">
+                            <span id="chatStats" class="text-[10px] font-mono text-slate-500">0 lines | 0 chars</span>
+                            <button onclick="clearChatInput()" class="text-[10px] font-mono text-purple-400 hover:text-pink-400 underline">Clear</button>
+                        </div>
+                    </div>
+                    <textarea id="chatInput" rows="5" oninput="updateStats()" class="w-full bg-slate-950/80 border border-purple-900/50 rounded-xl p-3 text-cyan-100 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-slate-600 transition" placeholder="Paste chat data here (e.g. Rahul: Hey Alisha...)"></textarea>
+                </div>
+
+                <button onclick="generateSummary()" id="catchUpBtn" class="w-full bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 hover:opacity-90 text-slate-950 font-bold py-2.5 rounded-xl transition duration-200 shadow-[0_0_20px_rgba(6,182,212,0.4)] tracking-wide uppercase text-xs">
+                    ⚡ Catch Up Now
+                </button>
+
+                <!-- Output Section -->
+                <div id="outputSection" class="hidden space-y-3 border-t border-purple-900/40 pt-4 animate-fadeIn">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-mono text-xs uppercase tracking-wider text-pink-400">Catchup Summary</h3>
+                        <div class="space-x-1.5">
+                            <button onclick="copyToClipboard()" class="bg-purple-900/40 hover:bg-purple-900 text-purple-200 text-xs px-2.5 py-1 rounded-lg border border-purple-700/50 transition">📋 Copy</button>
+                            <button onclick="downloadTxt()" class="bg-purple-900/40 hover:bg-purple-900 text-purple-200 text-xs px-2.5 py-1 rounded-lg border border-purple-700/50 transition">💾 Export</button>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="text" id="resultSearchInput" onkeyup="filterResults()" class="w-full bg-slate-950 border border-purple-900/50 rounded-lg p-1.5 text-cyan-100 text-xs placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" placeholder="🔍 Search inside summary...">
+                    </div>
+                    <div id="summaryContent" class="bg-slate-950/90 p-3 rounded-xl text-xs text-cyan-200/90 border border-cyan-900/30 whitespace-pre-line font-mono leading-relaxed max-h-56 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- HISTORY VIEW -->
+            <div id="historyView" class="hidden space-y-4">
+                <div class="flex justify-between items-center border-b border-purple-900/40 pb-2">
+                    <h3 class="text-xs font-mono uppercase tracking-wider text-cyan-300">📂 Past Catchup Reports</h3>
+                    <button onclick="closeHistoryModal()" class="text-xs text-purple-400 hover:text-cyan-300 underline font-mono">← Back</button>
+                </div>
+                <div id="historyListContainer" class="space-y-2 max-h-60 overflow-y-auto font-mono text-xs text-slate-300"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full max-w-6xl text-center py-4 text-xs font-mono text-slate-500">
+        © 2026 ChatCatchup. Neural-Synced Intelligence Engine.
+    </footer>
+
+    <script>
+        let isSignUpMode = true;
+        let currentUser = { name: '', email: '' };
+        let selectedPlatformName = 'WhatsApp';
+        let currentFormat = 'crisp';
+        let latestGeneratedText = '';
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('chatcatchup_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                const firstName = currentUser.name.split(' ')[0];
+                document.getElementById('personalizedGreeting').innerText = `Hey ${firstName}, how may I help you today?`;
+                document.getElementById('navUserBadge').innerText = firstName;
+                document.getElementById('navUserBadge').classList.remove('hidden');
+                document.getElementById('navActionBtn').innerText = 'Open Workspace';
+                updateHistoryCount();
+            }
+        };
+
+        function changeTheme(theme) {
+            const body = document.getElementById('bodyTheme');
+            const dot = document.getElementById('navDot');
+            if (theme === 'cyan') {
+                body.className = "bg-cyan-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6 selection:bg-cyan-500 selection:text-slate-950 transition-colors duration-300";
+                dot.style.boxShadow = "0 0 15px #06b6d4";
+            } else if (theme === 'pink') {
+                body.className = "bg-rose-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6 selection:bg-pink-500 selection:text-slate-950 transition-colors duration-300";
+                dot.style.boxShadow = "0 0 15px #ec4899";
+            } else {
+                body.className = "bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6 selection:bg-cyan-500 selection:text-slate-950 transition-colors duration-300";
+                dot.style.boxShadow = "0 0 10px #22d3ee";
+            }
+        }
+
+        function openAuthModal() {
+            document.getElementById('landingHero').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+
+            const savedUser = localStorage.getItem('chatcatchup_user');
+            if (savedUser) {
+                document.getElementById('authView').classList.add('hidden');
+                document.getElementById('historyView').classList.add('hidden');
+                document.getElementById('welcomeView').classList.remove('hidden');
+            } else {
+                document.getElementById('authView').classList.remove('hidden');
+                document.getElementById('welcomeView').classList.add('hidden');
+                document.getElementById('workspaceView').classList.add('hidden');
+                document.getElementById('historyView').classList.add('hidden');
+            }
+        }
+
+        function goHome() {
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('landingHero').classList.remove('hidden');
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.innerText = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.innerText = '👁️';
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const nameContainer = document.getElementById('nameFieldContainer');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const switchToggle = document.getElementById('authSwitchToggle');
+
+            if (isSignUpMode) {
+                title.innerText = "Create Your Account ⚡";
+                subtitle.innerText = "Enter your details to secure your workspace.";
+                nameContainer.style.display = "block";
+                submitBtn.innerText = "🚀 Create Account";
+                switchToggle.innerText = "Already have an account? Sign in";
+            } else {
+                title.innerText = "Welcome Back ⚡";
+                subtitle.innerText = "Sign in to access your workspace.";
+                nameContainer.style.display = "none";
+                submitBtn.innerText = "🔑 Sign In";
+                switchToggle.innerText = "Don't have an account? Create one";
+            }
+        }
+
+        function handleAuthSubmit() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            
+            if (!email || !password) {
+                alert('Please fill in all required fields!');
+                return;
+            }
+
+            if (isSignUpMode) {
+                const name = document.getElementById('fullNameInput').value.trim();
+                if (!name) {
+                    alert('Please enter your name!');
+                    return;
+                }
+                currentUser.name = name;
+            } else {
+                currentUser.name = email.split('@')[0];
+                currentUser.name = currentUser.name.charAt(0).toUpperCase() + currentUser.name.slice(1);
+            }
+
+            currentUser.email = email;
+            localStorage.setItem('chatcatchup_user', JSON.stringify(currentUser));
+
+            const firstName = currentUser.name.split(' ')[0];
+            document.getElementById('personalizedGreeting').innerText = `Hey ${firstName}, how may I help you today?`;
+            document.getElementById('navUserBadge').innerText = firstName;
+            document.getElementById('navUserBadge').classList.remove('hidden');
+            document.getElementById('navActionBtn').innerText = 'Open Workspace';
+
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('welcomeView').classList.remove('hidden');
+            updateHistoryCount();
+        }
+
+        function logout() {
+            localStorage.removeItem('chatcatchup_user');
+            currentUser = { name: '', email: '' };
+            document.getElementById('fullNameInput').value = '';
+            document.getElementById('emailInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('navUserBadge').classList.add('hidden');
+            document.getElementById('navActionBtn').innerText = 'Get Started';
+            goHome();
+        }
+
+        function selectPlatform(platform) {
+            selectedPlatformName = platform;
+            document.getElementById('activePlatformBadge').innerText = `${platform} Mode`;
+            document.getElementById('welcomeView').classList.add('hidden');
+            document.getElementById('workspaceView').classList.remove('hidden');
+        }
+
+        function backToWelcome() {
+            document.getElementById('workspaceView').classList.add('hidden');
+            document.getElementById('historyView').classList.add('hidden');
+            document.getElementById('welcomeView').classList.remove('hidden');
+            clearChatInput();
+            document.getElementById('outputSection').classList.add('hidden');
+        }
+
+        function setFormat(fmt) {
+            currentFormat = fmt;
+            ['crisp', 'brief', 'full'].forEach(f => {
+                const btn = document.getElementById(`formatBtn-${f}`);
+                if (f === fmt) {
+                    btn.className = "bg-purple-900 text-purple-100 text-xs font-mono py-1.5 rounded-lg border border-purple-500 transition";
+                } else {
+                    btn.className = "bg-slate-900/80 text-purple-400 text-xs font-mono py-1.5 rounded-lg border border-purple-900 transition";
+                }
+            });
+            if (!document.getElementById('outputSection').classList.contains('hidden')) {
+                generateSummary();
+            }
+        }
+
+        function updateStats() {
+            const text = document.getElementById('chatInput').value;
+            const lines = text ? text.split('\n').length : 0;
+            const chars = text.length;
+            document.getElementById('chatStats').innerText = `${lines} lines | ${chars} chars`;
+        }
+
+        function clearChatInput() {
+            document.getElementById('chatInput').value = '';
+            updateStats();
+            document.getElementById('outputSection').classList.add('hidden');
+        }
+
+        function generateSummary() {
+            const text = document.getElementById('chatInput').value.trim();
+            const outputSection = document.getElementById('outputSection');
+            const summaryContent = document.getElementById('summaryContent');
+            const catchUpBtn = document.getElementById('catchUpBtn');
+
+            if (!text) {
+                alert('Please paste a chat stream first!');
+                return;
+            }
+
+            // Neural Scanning Loader simulation
+            catchUpBtn.innerText = "⚡ Decrypting neural streams...";
+            catchUpBtn.disabled = true;
+
+            setTimeout(() => {
+                catchUpBtn.innerText = "⚡ Catch Up Now";
+                catchUpBtn.disabled = false;
+
+                const lines = text.split('\n');
+                const myName = currentUser.name.split(' ')[0].toLowerCase();
+                const userMentions = [];
+                const conflictKeywords = ['why', 'no', 'wrong', 'stop', 'fight', 'argue', 'what', 'problem', 'issue', 'bad', 'idiot', 'stupid', 'hate'];
+                let conflictDetected = false;
+                let conflictStarter = 'None';
+                let conflictLineNum = -1;
+                const keyPoints = [];
+
+                lines.forEach((line, index) => {
+                    if (line.includes('end-to-end encrypted') || line.trim() === '') return;
+
+                    const lowerLine = line.toLowerCase();
+
+                    if (lowerLine.includes(myName)) {
+                        userMentions.push(`Line ${index + 1}: ${line.trim()}`);
+                    }
+
+                    if (!conflictDetected) {
+                        for (let word of conflictKeywords) {
+                            if (lowerLine.includes(word) && (lowerLine.includes('?') || lowerLine.includes('!'))) {
+                                const match = line.match(/(?:\]\s*|\b)([A-Za-z\s]+):\s/);
+                                if (match && match[1]) {
+                                    conflictDetected = true;
+                                    conflictStarter = match[1].trim();
+                                    conflictLineNum = index + 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (lowerLine.includes('deadline') || lowerLine.includes('tomorrow') || lowerLine.includes('today') || lowerLine.includes('meeting') || lowerLine.includes('submit') || lowerLine.includes('notes') || lowerLine.includes('test')) {
+                        keyPoints.push(line.trim());
+                    }
+                });
+
+                outputSection.classList.remove('hidden');
+
+                let resultString = `> CATCHUP SUMMARY (${currentUser.name}) [Style: ${currentFormat.toUpperCase()}]\n\n`;
+
+                if (currentFormat === 'crisp') {
+                    if (userMentions.length > 0) {
+                        resultString += `🔔 USER MENTIONS (${userMentions.length}):\n`;
+                        userMentions.forEach(m => resultString += `  • ${m}\n`);
+                        resultString += `\n`;
+                    } else {
+                        resultString += `🔔 USER MENTIONS: You were not mentioned.\n\n`;
+                    }
+
+                    if (conflictDetected) {
+                        resultString += `⚡ CONFLICT: Started by ${conflictStarter} at line ${conflictLineNum}\n\n`;
+                    } else {
+                        resultString += `⚡ CONFLICT: None detected.\n\n`;
+                    }
+
+                    resultString += `📌 ACTION POINTS:\n`;
+                    const uniquePoints = [...new Set(keyPoints)].slice(0, 4);
+                    if (uniquePoints.length > 0) {
+                        uniquePoints.forEach((pt, i) => resultString += `  ${i + 1}. ${pt}\n`);
+                    } else {
+                        resultString += `  1. No specific tasks flagged.\n`;
+                    }
+                } else if (currentFormat === 'brief') {
+                    resultString += `📝 EXECUTIVE BRIEF:\n`;
+                    resultString += `  • Total Messages: ${lines.filter(l => l.trim()).length}\n`;
+                    resultString += `  • Active Participants: ${[...new Set(lines.map(l => l.match(/(?:\]\s*|\b)([A-Za-z\s]+):\s/)?.[1]?.trim()).filter(Boolean))].join(', ') || 'General'}\n`;
+                    resultString += `  • Summary: Group discussed general updates, scheduling, and feedback.\n`;
+                } else {
+                    resultString += `📊 FULL LOG SNIPPET:\n`;
+                    lines.slice(0, 15).forEach((l, idx) => {
+                        if(l.trim()) resultString += `  [${idx+1}] ${l.trim()}\n`;
+                    });
+                }
+
+                latestGeneratedText = resultString;
+                summaryContent.innerText = resultString;
+                saveReportToHistory(resultString);
+            }, 400);
+        }
+
+        function filterResults() {
+            const query = document.getElementById('resultSearchInput').value.toLowerCase();
+            const summaryContent = document.getElementById('summaryContent');
+            const lines = latestGeneratedText.split('\n');
+
+            if (!query) {
+                summaryContent.innerText = latestGeneratedText;
+                return;
+            }
+
+            const filteredLines = lines.filter(l => l.toLowerCase().includes(query));
+            summaryContent.innerText = filteredLines.length > 0 ? filteredLines.join('\n') : "No matching lines found.";
+        }
+
+        function saveReportToHistory(reportText) {
+            let history = JSON.parse(localStorage.getItem('chatcatchup_history') || '[]');
+            history.unshift({ date: new Date().toLocaleString(), text: reportText });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('chatcatchup_history', JSON.stringify(history));
+            updateHistoryCount();
+        }
+
+        function updateHistoryCount() {
+            let history = JSON.parse(localStorage.getItem('chatcatchup_history') || '[]');
+            document.getElementById('historyCount').innerText = history.length;
+        }
+
+        function openHistoryModal() {
+            document.getElementById('welcomeView').classList.add('hidden');
+            document.getElementById('historyView').classList.remove('hidden');
+
+            const container = document.getElementById('historyListContainer');
+            let history = JSON.parse(localStorage.getItem('chatcatchup_history') || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 italic">No saved history found.</p>`;
+                return;
+            }
+
+            let html = '';
+            history.forEach((item, idx) => {
+                html += `<div class="bg-slate-950/80 p-3 rounded-xl border border-purple-900/40 space-y-1">
+                    <div class="flex justify-between text-cyan-400 text-[10px]">
+                        <span>Report #${history.length - idx} (${item.date})</span>
+                        <button onclick="copyHistoryItem(${idx})" class="hover:underline text-pink-400">📋 Copy</button>
+                    </div>
+                    <pre class="whitespace-pre-line text-[11px] text-slate-300 max-h-24 overflow-y-auto">${item.text}</pre>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyView').classList.add('hidden');
+            document.getElementById('welcomeView').classList.remove('hidden');
+        }
+
+        function copyHistoryItem(idx) {
+            let history = JSON.parse(localStorage.getItem('chatcatchup_history') || '[]');
+            navigator.clipboard.writeText(history[idx].text).then(() => {
+                alert('Report copied to clipboard!');
+            });
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(latestGeneratedText).then(() => {
+                alert('Summary copied to clipboard!');
+            });
+        }
+
+        function downloadTxt() {
+            const blob = new Blob([latestGeneratedText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chatcatchup-summary.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
